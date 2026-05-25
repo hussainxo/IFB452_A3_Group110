@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Credential Verification Platform UI</title>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #f3f6fb;
+      --card: #ffffff;
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --success-bg: #dcfce7;
+      --success-text: #166534;
+      --error-bg: #fee2e2;
+      --error-text: #991b1b;
+      --info-bg: #eff6ff;
+      --info-text: #1e3a8a;
+      --warning-bg: #fff7ed;
+      --warning-text: #9a3412;
+      --border: #dbe4f0;
+      --muted: #64748b;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+      --radius: 16px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: #0f172a;
+    }
+    header {
+      background: linear-gradient(135deg, #173f91, #2563eb);
+      color: white;
+      padding: 28px 18px;
+      text-align: center;
+    }
+    header h1 { margin: 0 0 8px; font-size: 30px; }
+    header p { margin: 0; color: #dbeafe; }
+    main {
+      max-width: 1380px;
+      margin: 24px auto 40px;
+      padding: 0 18px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 20px;
+    }
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 20px;
+      border: 1px solid #eef2f7;
+    }
+    .card h2 {
+      margin: 0 0 14px;
+      font-size: 20px;
+      color: #173f91;
+    }
+    .card h3 {
+      margin: 18px 0 10px;
+      font-size: 15px;
+      color: #1d4ed8;
+    }
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      margin-top: 12px;
+    }
+    input, select, textarea {
+      width: 100%;
+      margin-top: 6px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 11px 12px;
+      font-size: 14px;
+      background: #fff;
+    }
+    textarea { min-height: 84px; resize: vertical; }
+    button {
+      width: 100%;
+      margin-top: 12px;
+      border: none;
+      border-radius: 10px;
+      padding: 11px 14px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      color: white;
+      background: var(--primary);
+      transition: background 0.15s ease, transform 0.05s ease;
+    }
+    button:hover { background: var(--primary-dark); }
+    button:active { transform: translateY(1px); }
+    button.secondary { background: #0f766e; }
+    button.secondary:hover { background: #0d5f58; }
+    button.warning { background: #dc2626; }
+    button.warning:hover { background: #b91c1c; }
+    button.gray { background: #475569; }
+    button.gray:hover { background: #334155; }
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .triple {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    .small {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+      word-break: break-word;
+    }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .result {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 14px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: var(--info-bg);
+      color: var(--info-text);
+      border: 1px solid #bfdbfe;
+    }
+    .success { background: var(--success-bg); color: var(--success-text); border-color: #86efac; }
+    .error { background: var(--error-bg); color: var(--error-text); border-color: #fca5a5; }
+    .warningBox { background: var(--warning-bg); color: var(--warning-text); border-color: #fdba74; }
+    .pill-wrap {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+    .pill {
+      padding: 8px 10px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      border: 1px solid #cbd5e1;
+      background: #f8fafc;
+      color: #334155;
+    }
+    .pill.active {
+      background: #dbeafe;
+      color: #1d4ed8;
+      border-color: #93c5fd;
+    }
+    .note {
+      margin-top: 14px;
+      padding: 12px;
+      border-radius: 10px;
+      background: #fff7ed;
+      color: #9a3412;
+      border: 1px solid #fdba74;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .sticky-top {
+      position: sticky;
+      top: 16px;
+    }
+    @media (max-width: 768px) {
+      .row, .triple { grid-template-columns: 1fr; }
+      header h1 { font-size: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Decentralised Credential Verification Platform</h1>
+    <p>MetaMask-ready UI for AccessControlContract, CredentialRegistryContract, and VerificationContract</p>
+  </header>
+
+  <main>
+    <div class="grid">
+      <section class="card sticky-top">
+        <h2>1. Wallet & Contract Setup</h2>
+        <button onclick="connectWallet()">Connect MetaMask</button>
+        <div id="walletResult" class="result">Connect your wallet to begin.</div>
+
+        <label>Connected Account</label>
+        <div id="walletAddress" class="small mono">Not connected</div>
+
+        <label>Network</label>
+        <div id="networkName" class="small">Unknown</div>
+
+        <div class="pill-wrap" id="rolePills">
+          <span class="pill">Admin: Unknown</span>
+          <span class="pill">Issuer: Unknown</span>
+          <span class="pill">Verifier: Unknown</span>
+          <span class="pill">Sponsor: Unknown</span>
+        </div>
+
+        <label>AccessControlContract Address</label>
+        <input id="accessControlAddress" placeholder="0x..." />
+
+        <label>CredentialRegistryContract Address</label>
+        <input id="registryAddress" placeholder="0x..." />
+
+        <label>VerificationContract Address</label>
+        <input id="verificationAddress" placeholder="0x..." />
+
+        <div class="row">
+          <button onclick="loadContracts()">Load Contracts</button>
+          <button class="gray" onclick="clearSavedAddresses()">Clear Saved</button>
+        </div>
+        <div id="contractResult" class="result">Paste the deployed contract addresses, then load them.</div>
+
+        <div class="note">
+          Use the same network as your deployed contracts. If you deployed on Sepolia, MetaMask must also be on Sepolia.
+          For issuer-only actions, the connected MetaMask account must actually have the issuer role.
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>2. Admin: Manage Roles</h2>
+
+        <h3>Assign Roles</h3>
+        <label>Issuer Address</label>
+        <input id="issuerAddress" placeholder="0x issuer wallet" />
+        <button onclick="assignIssuer()">Assign Issuer</button>
+
+        <label>Verifier Address</label>
+        <input id="verifierAddress" placeholder="0x verifier wallet" />
+        <button onclick="assignVerifier()">Assign Verifier</button>
+
+        <label>Sponsor Address</label>
+        <input id="sponsorAddress" placeholder="0x sponsor wallet" />
+        <button onclick="assignSponsor()">Assign Sponsor</button>
+
+        <h3>Remove Roles</h3>
+        <label>Remove Issuer</label>
+        <input id="removeIssuerAddress" placeholder="0x issuer wallet" />
+        <button class="warning" onclick="removeIssuer()">Remove Issuer</button>
+
+        <label>Remove Verifier</label>
+        <input id="removeVerifierAddress" placeholder="0x verifier wallet" />
+        <button class="warning" onclick="removeVerifier()">Remove Verifier</button>
+
+        <label>Remove Sponsor</label>
+        <input id="removeSponsorAddress" placeholder="0x sponsor wallet" />
+        <button class="warning" onclick="removeSponsor()">Remove Sponsor</button>
+
+        <h3>Check Address Roles</h3>
+        <label>Address to Inspect</label>
+        <input id="roleCheckAddress" placeholder="0x wallet" />
+        <button class="secondary" onclick="checkRolesForAddress()">Check Roles</button>
+
+        <div id="roleResult" class="result">Role management results will appear here.</div>
+      </section>
+
+      <section class="card">
+        <h2>3. Issuer: Issue & Revoke</h2>
+
+        <label>Holder Address</label>
+        <input id="holderAddress" placeholder="0x holder wallet" />
+
+        <label>Credential Hash</label>
+        <input id="credentialHash" placeholder="Qm... or other hash" />
+
+        <label>Metadata URI</label>
+        <input id="metadataURI" placeholder="ipfs://... or https://..." />
+
+        <label>Expiry Date (Unix timestamp in seconds, or 0 for no expiry)</label>
+        <input id="expiryDate" type="number" min="0" placeholder="0" value="0" />
+
+        <button onclick="issueCredential()">Issue Credential</button>
+
+        <label>Credential ID to Revoke</label>
+        <input id="revokeCredentialId" type="number" min="1" placeholder="1" />
+        <button class="warning" onclick="revokeCredential()">Revoke Credential</button>
+
+        <div id="issueResult" class="result">Issuer actions will appear here.</div>
+      </section>
+
+      <section class="card">
+        <h2>4. Holder: Access Control</h2>
+
+        <label>Credential ID</label>
+        <input id="accessCredentialId" type="number" min="1" placeholder="1" />
+
+        <label>Verifier or Sponsor Address</label>
+        <input id="authorisedPartyAddress" placeholder="0x verifier or sponsor wallet" />
+
+        <div class="row">
+          <button onclick="grantAccess()">Grant Access</button>
+          <button class="warning" onclick="revokeAccess()">Revoke Access</button>
+        </div>
+
+        <button class="secondary" onclick="checkCredentialAccess()">Check Access</button>
+
+        <div id="accessResult" class="result">Access actions will appear here.</div>
+      </section>
+
+      <section class="card">
+        <h2>5. Verification</h2>
+
+        <label>Credential ID for Verifier</label>
+        <input id="verifyCredentialId" type="number" min="1" placeholder="1" />
+        <div class="row">
+          <button onclick="verifyCredential()">Verify Credential</button>
+          <button class="secondary" onclick="verifyCredentialView()">View Verify</button>
+        </div>
+
+        <label>Credential ID for Sponsor</label>
+        <input id="rewardCredentialId" type="number" min="1" placeholder="1" />
+        <div class="row">
+          <button onclick="verifyCredentialForReward()">Verify for Reward</button>
+          <button class="secondary" onclick="verifyCredentialForRewardView()">View Reward Check</button>
+        </div>
+
+        <div id="verifyResult" class="result">Verification results will appear here.</div>
+      </section>
+
+      <section class="card">
+        <h2>6. Admin: Recover Holder</h2>
+
+        <label>Credential ID</label>
+        <input id="manageCredentialId" type="number" min="1" placeholder="1" />
+
+        <label>New Holder Address</label>
+        <input id="newHolderAddress" placeholder="0x new holder wallet" />
+
+        <button onclick="transferCredentialHolder()">Transfer Credential Holder</button>
+
+        <div id="manageResult" class="result">Recovery results will appear here.</div>
+      </section>
+
+      <section class="card">
+        <h2>7. Lookup & Validation</h2>
+
+        <label>Credential ID</label>
+        <input id="lookupCredentialId" type="number" min="1" placeholder="1" />
+
+        <div class="triple">
+          <button onclick="getCredential()">Get Credential</button>
+          <button class="secondary" onclick="isCredentialValid()">Check Validity</button>
+          <button class="gray" onclick="credentialExists()">Check Exists</button>
+        </div>
+
+        <div class="row">
+          <button class="secondary" onclick="getCredentialHolder()">Get Holder</button>
+          <button class="secondary" onclick="getCredentialIssuer()">Get Issuer</button>
+        </div>
+
+        <div id="lookupResult" class="result">Lookup results will appear here.</div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    let provider;
+    let signer;
+    let accessControlContract;
+    let registryContract;
+    let verificationContract;
+
+    const STORAGE_KEYS = {
+      accessControlAddress: "cv_access_control_address",
+      registryAddress: "cv_registry_address",
+      verificationAddress: "cv_verification_address"
+    };
+
+    const accessControlABI = [
+      "function admin() view returns (address)",
+      "function assignIssuer(address issuer)",
+      "function removeIssuer(address issuer)",
+      "function assignVerifier(address verifier)",
+      "function removeVerifier(address verifier)",
+      "function assignSponsor(address sponsor)",
+      "function removeSponsor(address sponsor)",
+      "function isAdmin(address user) view returns (bool)",
+      "function isIssuer(address user) view returns (bool)",
+      "function isVerifier(address user) view returns (bool)",
+      "function isSponsor(address user) view returns (bool)",
+      "function hasCredentialAccess(uint256 credentialId, address authorisedParty) view returns (bool)",
+      "event IssuerAssigned(address indexed issuer)",
+      "event IssuerRemoved(address indexed issuer)",
+      "event VerifierAssigned(address indexed verifier)",
+      "event VerifierRemoved(address indexed verifier)",
+      "event SponsorAssigned(address indexed sponsor)",
+      "event SponsorRemoved(address indexed sponsor)",
+      "event CredentialAccessGranted(uint256 indexed credentialId, address indexed authorisedParty)",
+      "event CredentialAccessRevoked(uint256 indexed credentialId, address indexed authorisedParty)"
+    ];
+
+    const registryABI = [
+      "function accessControl() view returns (address)",
+      "function admin() view returns (address)",
+      "function nextCredentialId() view returns (uint256)",
+      "function issueCredential(address holder, string credentialHash, string metadataURI, uint256 expiryDate) returns (uint256)",
+      "function revokeCredential(uint256 credentialId)",
+      "function grantAccess(uint256 credentialId, address authorisedParty)",
+      "function revokeAccess(uint256 credentialId, address authorisedParty)",
+      "function transferCredentialHolder(uint256 credentialId, address newHolder)",
+      "function credentialExists(uint256 credentialId) view returns (bool)",
+      "function getCredential(uint256 credentialId) view returns (uint256 id, address issuer, address holder, string credentialHash, string metadataURI, uint256 issuedAt, uint256 expiryDate, bool revoked, bool exists)",
+      "function isCredentialValid(uint256 credentialId) view returns (bool)",
+      "function getCredentialHolder(uint256 credentialId) view returns (address)",
+      "function getCredentialIssuer(uint256 credentialId) view returns (address)",
+      "event CredentialIssued(uint256 indexed credentialId, address indexed issuer, address indexed holder, string credentialHash, string metadataURI, uint256 expiryDate)",
+      "event CredentialRevoked(uint256 indexed credentialId, address indexed issuer)",
+      "event CredentialAccessGranted(uint256 indexed credentialId, address indexed holder, address indexed authorisedParty)",
+      "event CredentialAccessRevoked(uint256 indexed credentialId, address indexed holder, address indexed authorisedParty)",
+      "event CredentialHolderRecovered(uint256 indexed credentialId, address indexed oldHolder, address indexed newHolder)"
+    ];
+
+    const verificationABI = [
+      "function verifyCredential(uint256 credentialId) returns (bool)",
+      "function verifyCredentialView(uint256 credentialId, address verifier) view returns (bool)",
+      "function verifyCredentialForReward(uint256 credentialId) returns (bool)",
+      "function verifyCredentialForRewardView(uint256 credentialId, address sponsor) view returns (bool)",
+      "event CredentialVerified(uint256 indexed credentialId, address indexed verifier, bool result, uint8 status)",
+      "event RewardEligibilityChecked(uint256 indexed credentialId, address indexed sponsor, bool result, uint8 status)"
+    ];
+
+    const verificationStatusMap = {
+      0: "Valid",
+      1: "InvalidCredential",
+      2: "AccessDenied",
+      3: "NotAuthorisedVerifier",
+      4: "NotAuthorisedSponsor"
+    };
+
+    function setResult(id, message, type = "info") {
+      const el = document.getElementById(id);
+      el.textContent = message;
+      el.className = "result";
+      if (type === "success") el.classList.add("success");
+      if (type === "error") el.classList.add("error");
+      if (type === "warning") el.classList.add("warningBox");
+    }
+
+    function formatError(error) {
+      return (
+        error?.reason ||
+        error?.data?.message ||
+        error?.error?.message ||
+        error?.message ||
+        String(error)
+      );
+    }
+
+    function isValidAddress(address) {
+      return !!address && ethers.utils.isAddress(address);
+    }
+
+    function mustBeAddress(value, label) {
+      if (!isValidAddress(value)) {
+        throw new Error(`${label} is not a valid Ethereum address.`);
+      }
+    }
+
+    function mustBePositiveInt(value, label) {
+      if (value === "" || value === null || value === undefined) {
+        throw new Error(`${label} is required.`);
+      }
+      const num = Number(value);
+      if (!Number.isInteger(num) || num < 1) {
+        throw new Error(`${label} must be a positive integer.`);
+      }
+      return num;
+    }
+
+    function getValue(id) {
+      return document.getElementById(id).value.trim();
+    }
+
+    function saveContractAddresses() {
+      localStorage.setItem(STORAGE_KEYS.accessControlAddress, getValue("accessControlAddress"));
+      localStorage.setItem(STORAGE_KEYS.registryAddress, getValue("registryAddress"));
+      localStorage.setItem(STORAGE_KEYS.verificationAddress, getValue("verificationAddress"));
+    }
+
+    function restoreContractAddresses() {
+      document.getElementById("accessControlAddress").value = localStorage.getItem(STORAGE_KEYS.accessControlAddress) || "";
+      document.getElementById("registryAddress").value = localStorage.getItem(STORAGE_KEYS.registryAddress) || "";
+      document.getElementById("verificationAddress").value = localStorage.getItem(STORAGE_KEYS.verificationAddress) || "";
+    }
+
+    function clearSavedAddresses() {
+      localStorage.removeItem(STORAGE_KEYS.accessControlAddress);
+      localStorage.removeItem(STORAGE_KEYS.registryAddress);
+      localStorage.removeItem(STORAGE_KEYS.verificationAddress);
+      document.getElementById("accessControlAddress").value = "";
+      document.getElementById("registryAddress").value = "";
+      document.getElementById("verificationAddress").value = "";
+      accessControlContract = undefined;
+      registryContract = undefined;
+      verificationContract = undefined;
+      setResult("contractResult", "Saved contract addresses cleared.", "success");
+      updateRolePills();
+    }
+
+    async function connectWallet() {
+      try {
+        if (!window.ethereum) {
+          throw new Error("MetaMask is not installed. Please install MetaMask first.");
+        }
+        await window.ethereum.request({ method: "eth_requestAccounts" });
+        await refreshConnectedAccount();
+      } catch (error) {
+        setResult("walletResult", formatError(error), "error");
+      }
+    }
+
+    async function refreshConnectedAccount() {
+      if (!window.ethereum) return;
+      provider = new ethers.providers.Web3Provider(window.ethereum);
+      signer = provider.getSigner();
+      const accounts = await provider.listAccounts();
+      const network = await provider.getNetwork();
+
+      if (!accounts.length) {
+        document.getElementById("walletAddress").textContent = "Not connected";
+        document.getElementById("networkName").textContent = "Unknown";
+        setResult("walletResult", "Connect your wallet to begin.");
+        updateRolePills();
+        return;
+      }
+
+      const address = await signer.getAddress();
+      document.getElementById("walletAddress").textContent = address;
+      document.getElementById("networkName").textContent = `${network.name} (${network.chainId})`;
+
+      if (network.chainId !== 11155111) {
+        setResult("walletResult", `Wallet connected: ${address}\nWarning: current chain is ${network.name} (${network.chainId}). If your contracts are on Sepolia, switch MetaMask to Sepolia.`, "warning");
+      } else {
+        setResult("walletResult", `Wallet connected: ${address}\nNetwork: Sepolia`, "success");
+      }
+
+      reconnectContractsWithCurrentSigner();
+      await updateRolePills();
+    }
+
+    function reconnectContractsWithCurrentSigner() {
+      const accessAddress = getValue("accessControlAddress");
+      const registryAddress = getValue("registryAddress");
+      const verificationAddress = getValue("verificationAddress");
+      if (!signer) return;
+
+      accessControlContract = isValidAddress(accessAddress)
+        ? new ethers.Contract(accessAddress, accessControlABI, signer)
+        : undefined;
+      registryContract = isValidAddress(registryAddress)
+        ? new ethers.Contract(registryAddress, registryABI, signer)
+        : undefined;
+      verificationContract = isValidAddress(verificationAddress)
+        ? new ethers.Contract(verificationAddress, verificationABI, signer)
+        : undefined;
+    }
+
+    function requireSigner() {
+      if (!signer) throw new Error("Connect MetaMask first.");
+    }
+
+    function requireAccessControl() {
+      requireSigner();
+      if (!accessControlContract) throw new Error("Load AccessControlContract first.");
+    }
+
+    function requireRegistry() {
+      requireSigner();
+      if (!registryContract) throw new Error("Load CredentialRegistryContract first.");
+    }
+
+    function requireVerification() {
+      requireSigner();
+      if (!verificationContract) throw new Error("Load VerificationContract first.");
+    }
+
+    async function ensureConnectedRole(role) {
+      requireAccessControl();
+      const account = await signer.getAddress();
+      let ok = false;
+      if (role === "admin") ok = await accessControlContract.isAdmin(account);
+      if (role === "issuer") ok = await accessControlContract.isIssuer(account);
+      if (role === "verifier") ok = await accessControlContract.isVerifier(account);
+      if (role === "sponsor") ok = await accessControlContract.isSponsor(account);
+      if (!ok) throw new Error(`Connected wallet ${account} does not have the required ${role} role.`);
+      return account;
+    }
+
+    async function loadContracts() {
+      try {
+        requireSigner();
+        const accessAddress = getValue("accessControlAddress");
+        const registryAddress = getValue("registryAddress");
+        const verificationAddress = getValue("verificationAddress");
+
+        mustBeAddress(accessAddress, "AccessControlContract address");
+        mustBeAddress(registryAddress, "CredentialRegistryContract address");
+        mustBeAddress(verificationAddress, "VerificationContract address");
+
+        reconnectContractsWithCurrentSigner();
+
+        const linkedAccessAddress = await registryContract.accessControl();
+        if (linkedAccessAddress.toLowerCase() !== accessAddress.toLowerCase()) {
+          throw new Error("Registry contract is linked to a different AccessControl contract address.");
+        }
+
+        saveContractAddresses();
+        await updateRolePills();
+
+        setResult(
+          "contractResult",
+          "Contracts loaded successfully. You can now interact with the DApp.",
+          "success"
+        );
+      } catch (error) {
+        setResult("contractResult", formatError(error), "error");
+      }
+    }
+
+    async function updateRolePills() {
+      const container = document.getElementById("rolePills");
+      let statuses = [
+        ["Admin", "Unknown", false],
+        ["Issuer", "Unknown", false],
+        ["Verifier", "Unknown", false],
+        ["Sponsor", "Unknown", false]
+      ];
+
+      try {
+        if (signer && accessControlContract) {
+          const account = await signer.getAddress();
+          const [isAdmin, isIssuer, isVerifier, isSponsor] = await Promise.all([
+            accessControlContract.isAdmin(account),
+            accessControlContract.isIssuer(account),
+            accessControlContract.isVerifier(account),
+            accessControlContract.isSponsor(account)
+          ]);
+          statuses = [
+            ["Admin", isAdmin ? "Yes" : "No", isAdmin],
+            ["Issuer", isIssuer ? "Yes" : "No", isIssuer],
+            ["Verifier", isVerifier ? "Yes" : "No", isVerifier],
+            ["Sponsor", isSponsor ? "Yes" : "No", isSponsor]
+          ];
+        }
+      } catch (_) {}
+
+      container.innerHTML = statuses.map(([label, value, active]) => `
+        <span class="pill ${active ? "active" : ""}">${label}: ${value}</span>
+      `).join("");
+    }
+
+    async function parseEventFromReceipt(receipt, iface, eventName) {
+      for (const log of receipt.logs) {
+        try {
+          const parsed = iface.parseLog(log);
+          if (parsed && parsed.name === eventName) return parsed;
+        } catch (_) {}
+      }
+      return null;
+    }
+
+    function formatTimestamp(seconds) {
+      const num = Number(seconds);
+      if (!num) return "0 (no expiry / not set)";
+      return `${num} (${new Date(num * 1000).toLocaleString()})`;
+    }
+
+    async function assignIssuer() {
+      try {
+        requireAccessControl();
+        await ensureConnectedRole("admin");
+        const issuer = getValue("issuerAddress");
+        mustBeAddress(issuer, "Issuer address");
+        const tx = await accessControlContract.assignIssuer(issuer);
+        await tx.wait();
+        await updateRolePills();
+        setResult("roleResult", `Issuer assigned successfully: ${issuer}`, "success");
+      } catch (error) {
+        setResult("roleResult", formatError(error), "error");
+      }
+    }
+
+    async function removeIssuer() {
+      try {
+        requireAccessControl();
+        await ensureConnectedRole("admin");
+        const issuer = getValue("removeIssuerAddress");
+        mustBeAddress(issuer, "Issuer address");
+        const tx = await accessControlContract.removeIssuer(issuer);
+        await tx.wait();
+        await updateRolePills();
+        setResult("roleResult", `Issuer removed successfully: ${issuer}`, "success");
+      } catch (error) {
+        setResult("roleResult", formatError(error), "error");
+      }
+    }
+
+    async function assignVerifier() {
+      try {
+        requireAccessControl();
+        await ensureConnectedRole("admin");
+        const verifier = getValue("verifierAddress");
+        mustBeAddress(verifier, "Verifier address");
+        const tx = await accessControlContract.assignVerifier(verifier);
+        await tx.wait();
+        await updateRolePills();
+        setResult("roleResult", `Verifier assigned successfully: ${verifier}`, "success");
+      } catch (error) {
+        setResult("roleResult", formatError(error), "error");
+      }
+    }
+
+    async function removeVerifier() {
+      try {
+        requireAccessControl();
+        await ensureConnectedRole("admin");
+        const verifier = getValue("removeVerifierAddress");
+        mustBeAddress(verifier, "Verifier address");
+        const tx = await accessControlContract.removeVerifier(verifier);
+        await tx.wait();
+        await updateRolePills();
+        setResult("roleResult", `Verifier removed successfully: ${verifier}`, "success");
+      } catch (error) {
+        setResult("roleResult", formatError(error), "error");
+      }
+    }
+
+    async function assignSponsor() {
+      try {
+        requireAccessControl();
+        await ensureConnectedRole("admin");
+        const sponsor = getValue("sponsorAddress");
+        mustBeAddress(sponsor, "Sponsor address");
+        const tx = await accessControlContract.assignSponsor(sponsor);
+        await tx.wait();
+        await updateRolePills();
+        setResult("roleResult", `Sponsor assigned successfully: ${sponsor}`, "success");
+      } catch (error) {
+        setResult("roleResult", formatError(error), "error");
+      }
+    }
+
+    async function removeSponsor() {
+      try {
+        requireAccessControl();
+        await ensureConnectedRole("admin");
+        const sponsor = getValue("removeSponsorAddress");
+        mustBeAddress(sponsor, "Sponsor address");
+        const tx = await accessControlContract.removeSponsor(sponsor);
+        await tx.wait();
+        await updateRolePills();
+        setResult("roleResult", `Sponsor removed successfully: ${sponsor}`, "success");
+      } catch (error) {
+        setResult("roleResult", formatError(error), "error");
+      }
+    }
+
+    async function checkRolesForAddress() {
+      try {
+        requireAccessControl();
+        const address = getValue("roleCheckAddress");
+        mustBeAddress(address, "Address");
+        const [isAdmin, isIssuer, isVerifier, isSponsor] = await Promise.all([
+          accessControlContract.isAdmin(address),
+          accessControlContract.isIssuer(address),
+          accessControlContract.isVerifier(address),
+          accessControlContract.isSponsor(address)
+        ]);
+        setResult(
+          "roleResult",
+          `Address: ${address}\nAdmin: ${isAdmin}\nIssuer: ${isIssuer}\nVerifier: ${isVerifier}\nSponsor: ${isSponsor}`,
+          "success"
+        );
+      } catch (error) {
+        setResult("roleResult", formatError(error), "error");
+      }
+    }
+
+    async function issueCredential() {
+      try {
+        requireRegistry();
+        requireAccessControl();
+        await ensureConnectedRole("issuer");
+
+        const holder = getValue("holderAddress");
+        const credentialHash = getValue("credentialHash");
+        const metadataURI = getValue("metadataURI");
+        const expiryDate = getValue("expiryDate") || "0";
+
+        mustBeAddress(holder, "Holder address");
+        if (!credentialHash) throw new Error("Credential hash is required.");
+        if (!/^\d+$/.test(expiryDate)) throw new Error("Expiry date must be a non-negative integer in Unix seconds, or 0.");
+
+        const tx = await registryContract.issueCredential(holder, credentialHash, metadataURI, expiryDate);
+        const receipt = await tx.wait();
+        const parsed = await parseEventFromReceipt(receipt, registryContract.interface, "CredentialIssued");
+
+        let message = "Credential issued successfully.";
+        if (parsed) {
+          message = `Credential issued successfully.\nCredential ID: ${parsed.args.credentialId.toString()}\nIssuer: ${parsed.args.issuer}\nHolder: ${parsed.args.holder}\nCredential Hash: ${parsed.args.credentialHash}\nMetadata URI: ${parsed.args.metadataURI}\nExpiry: ${formatTimestamp(parsed.args.expiryDate.toString())}`;
+        }
+        setResult("issueResult", message, "success");
+      } catch (error) {
+        setResult("issueResult", formatError(error), "error");
+      }
+    }
+
+    async function revokeCredential() {
+      try {
+        requireRegistry();
+        requireAccessControl();
+        await ensureConnectedRole("issuer");
+        const credentialId = mustBePositiveInt(getValue("revokeCredentialId"), "Credential ID");
+        const tx = await registryContract.revokeCredential(credentialId);
+        await tx.wait();
+        setResult("issueResult", `Credential ${credentialId} revoked successfully.`, "success");
+      } catch (error) {
+        setResult("issueResult", formatError(error), "error");
+      }
+    }
+
+    async function grantAccess() {
+      try {
+        requireRegistry();
+        const credentialId = mustBePositiveInt(getValue("accessCredentialId"), "Credential ID");
+        const party = getValue("authorisedPartyAddress");
+        mustBeAddress(party, "Verifier or sponsor address");
+        const tx = await registryContract.grantAccess(credentialId, party);
+        await tx.wait();
+        setResult("accessResult", `Access granted for credential ${credentialId} to ${party}`, "success");
+      } catch (error) {
+        setResult("accessResult", formatError(error), "error");
+      }
+    }
+
+    async function revokeAccess() {
+      try {
+        requireRegistry();
+        const credentialId = mustBePositiveInt(getValue("accessCredentialId"), "Credential ID");
+        const party = getValue("authorisedPartyAddress");
+        mustBeAddress(party, "Verifier or sponsor address");
+        const tx = await registryContract.revokeAccess(credentialId, party);
+        await tx.wait();
+        setResult("accessResult", `Access revoked for credential ${credentialId} from ${party}`, "success");
+      } catch (error) {
+        setResult("accessResult", formatError(error), "error");
+      }
+    }
+
+    async function checkCredentialAccess() {
+      try {
+        requireAccessControl();
+        const credentialId = mustBePositiveInt(getValue("accessCredentialId"), "Credential ID");
+        const party = getValue("authorisedPartyAddress");
+        mustBeAddress(party, "Verifier or sponsor address");
+        const result = await accessControlContract.hasCredentialAccess(credentialId, party);
+        setResult("accessResult", `Credential ${credentialId}\nAuthorised party: ${party}\nHas access: ${result}`, result ? "success" : "warning");
+      } catch (error) {
+        setResult("accessResult", formatError(error), "error");
+      }
+    }
+
+    async function verifyCredential() {
+      try {
+        requireVerification();
+        const credentialId = mustBePositiveInt(getValue("verifyCredentialId"), "Credential ID");
+        const tx = await verificationContract.verifyCredential(credentialId);
+        const receipt = await tx.wait();
+        const parsed = await parseEventFromReceipt(receipt, verificationContract.interface, "CredentialVerified");
+        let message = `Verification transaction mined for credential ${credentialId}.`;
+        let type = "success";
+        if (parsed) {
+          const status = verificationStatusMap[parsed.args.status] || `Unknown(${parsed.args.status})`;
+          const result = parsed.args.result;
+          message = `Verifier result: ${result}\nStatus: ${status}\nCredential ID: ${parsed.args.credentialId.toString()}\nVerifier: ${parsed.args.verifier}`;
+          type = result ? "success" : "warning";
+        }
+        setResult("verifyResult", message, type);
+      } catch (error) {
+        setResult("verifyResult", formatError(error), "error");
+      }
+    }
+
+    async function verifyCredentialView() {
+      try {
+        requireVerification();
+        requireSigner();
+        const credentialId = mustBePositiveInt(getValue("verifyCredentialId"), "Credential ID");
+        const verifier = await signer.getAddress();
+        const result = await verificationContract.verifyCredentialView(credentialId, verifier);
+        setResult("verifyResult", `verifyCredentialView(${credentialId}, ${verifier}) => ${result}`, result ? "success" : "warning");
+      } catch (error) {
+        setResult("verifyResult", formatError(error), "error");
+      }
+    }
+
+    async function verifyCredentialForReward() {
+      try {
+        requireVerification();
+        const credentialId = mustBePositiveInt(getValue("rewardCredentialId"), "Credential ID");
+        const tx = await verificationContract.verifyCredentialForReward(credentialId);
+        const receipt = await tx.wait();
+        const parsed = await parseEventFromReceipt(receipt, verificationContract.interface, "RewardEligibilityChecked");
+        let message = `Reward verification transaction mined for credential ${credentialId}.`;
+        let type = "success";
+        if (parsed) {
+          const status = verificationStatusMap[parsed.args.status] || `Unknown(${parsed.args.status})`;
+          const result = parsed.args.result;
+          message = `Sponsor result: ${result}\nStatus: ${status}\nCredential ID: ${parsed.args.credentialId.toString()}\nSponsor: ${parsed.args.sponsor}`;
+          type = result ? "success" : "warning";
+        }
+        setResult("verifyResult", message, type);
+      } catch (error) {
+        setResult("verifyResult", formatError(error), "error");
+      }
+    }
+
+    async function verifyCredentialForRewardView() {
+      try {
+        requireVerification();
+        requireSigner();
+        const credentialId = mustBePositiveInt(getValue("rewardCredentialId"), "Credential ID");
+        const sponsor = await signer.getAddress();
+        const result = await verificationContract.verifyCredentialForRewardView(credentialId, sponsor);
+        setResult("verifyResult", `verifyCredentialForRewardView(${credentialId}, ${sponsor}) => ${result}`, result ? "success" : "warning");
+      } catch (error) {
+        setResult("verifyResult", formatError(error), "error");
+      }
+    }
+
+    async function transferCredentialHolder() {
+      try {
+        requireRegistry();
+        requireAccessControl();
+        await ensureConnectedRole("admin");
+        const credentialId = mustBePositiveInt(getValue("manageCredentialId"), "Credential ID");
+        const newHolder = getValue("newHolderAddress");
+        mustBeAddress(newHolder, "New holder address");
+        const tx = await registryContract.transferCredentialHolder(credentialId, newHolder);
+        await tx.wait();
+        setResult("manageResult", `Credential ${credentialId} transferred to new holder ${newHolder}`, "success");
+      } catch (error) {
+        setResult("manageResult", formatError(error), "error");
+      }
+    }
+
+    async function getCredential() {
+      try {
+        requireRegistry();
+        const credentialId = mustBePositiveInt(getValue("lookupCredentialId"), "Credential ID");
+        const c = await registryContract.getCredential(credentialId);
+        const output = [
+          `Credential ID: ${c.id.toString()}`,
+          `Issuer: ${c.issuer}`,
+          `Holder: ${c.holder}`,
+          `Credential Hash: ${c.credentialHash}`,
+          `Metadata URI: ${c.metadataURI}`,
+          `Issued At: ${formatTimestamp(c.issuedAt.toString())}`,
+          `Expiry Date: ${formatTimestamp(c.expiryDate.toString())}`,
+          `Revoked: ${c.revoked}`,
+          `Exists: ${c.exists}`
+        ].join("\n");
+        setResult("lookupResult", output, "success");
+      } catch (error) {
+        setResult("lookupResult", formatError(error), "error");
+      }
+    }
+
+    async function isCredentialValid() {
+      try {
+        requireRegistry();
+        const credentialId = mustBePositiveInt(getValue("lookupCredentialId"), "Credential ID");
+        const valid = await registryContract.isCredentialValid(credentialId);
+        setResult("lookupResult", `Credential ${credentialId} valid: ${valid}`, valid ? "success" : "warning");
+      } catch (error) {
+        setResult("lookupResult", formatError(error), "error");
+      }
+    }
+
+    async function credentialExists() {
+      try {
+        requireRegistry();
+        const credentialId = mustBePositiveInt(getValue("lookupCredentialId"), "Credential ID");
+        const exists = await registryContract.credentialExists(credentialId);
+        setResult("lookupResult", `Credential ${credentialId} exists: ${exists}`, exists ? "success" : "warning");
+      } catch (error) {
+        setResult("lookupResult", formatError(error), "error");
+      }
+    }
+
+    async function getCredentialHolder() {
+      try {
+        requireRegistry();
+        const credentialId = mustBePositiveInt(getValue("lookupCredentialId"), "Credential ID");
+        const holder = await registryContract.getCredentialHolder(credentialId);
+        setResult("lookupResult", `Credential ${credentialId} holder: ${holder}`, "success");
+      } catch (error) {
+        setResult("lookupResult", formatError(error), "error");
+      }
+    }
+
+    async function getCredentialIssuer() {
+      try {
+        requireRegistry();
+        const credentialId = mustBePositiveInt(getValue("lookupCredentialId"), "Credential ID");
+        const issuer = await registryContract.getCredentialIssuer(credentialId);
+        setResult("lookupResult", `Credential ${credentialId} issuer: ${issuer}`, "success");
+      } catch (error) {
+        setResult("lookupResult", formatError(error), "error");
+      }
+    }
+
+    window.addEventListener("load", async () => {
+      restoreContractAddresses();
+      if (window.ethereum) {
+        await refreshConnectedAccount();
+
+        const accessAddress = getValue("accessControlAddress");
+        const registryAddress = getValue("registryAddress");
+        const verificationAddress = getValue("verificationAddress");
+        if (isValidAddress(accessAddress) && isValidAddress(registryAddress) && isValidAddress(verificationAddress) && signer) {
+          reconnectContractsWithCurrentSigner();
+          setResult("contractResult", "Saved contract addresses restored. Click Load Contracts to verify and begin.", "success");
+          await updateRolePills();
+        }
+
+        window.ethereum.on("accountsChanged", async () => {
+          await refreshConnectedAccount();
+          reconnectContractsWithCurrentSigner();
+          await updateRolePills();
+          setResult("walletResult", "Account changed. Contracts reconnected to the new signer.", "warning");
+        });
+
+        window.ethereum.on("chainChanged", () => {
+          window.location.reload();
+        });
+      }
+    });
+  </script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html>

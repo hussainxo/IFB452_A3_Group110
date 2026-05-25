@@ -1,0 +1,236 @@
+{
+	"compiler": {
+		"version": "0.8.20+commit.a1b79de6"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "accessControlAddress",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "credentialRegistryAddress",
+						"type": "address"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "constructor"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "uint256",
+						"name": "credentialId",
+						"type": "uint256"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "verifier",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "bool",
+						"name": "result",
+						"type": "bool"
+					},
+					{
+						"indexed": false,
+						"internalType": "enum VerificationContract.VerificationStatus",
+						"name": "status",
+						"type": "uint8"
+					}
+				],
+				"name": "CredentialVerified",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "uint256",
+						"name": "credentialId",
+						"type": "uint256"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "sponsor",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "bool",
+						"name": "result",
+						"type": "bool"
+					},
+					{
+						"indexed": false,
+						"internalType": "enum VerificationContract.VerificationStatus",
+						"name": "status",
+						"type": "uint8"
+					}
+				],
+				"name": "RewardEligibilityChecked",
+				"type": "event"
+			},
+			{
+				"inputs": [],
+				"name": "accessControl",
+				"outputs": [
+					{
+						"internalType": "contract AccessControlContract",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "credentialRegistry",
+				"outputs": [
+					{
+						"internalType": "contract CredentialRegistryContract",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "credentialId",
+						"type": "uint256"
+					}
+				],
+				"name": "verifyCredential",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "credentialId",
+						"type": "uint256"
+					}
+				],
+				"name": "verifyCredentialForReward",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "credentialId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "address",
+						"name": "sponsor",
+						"type": "address"
+					}
+				],
+				"name": "verifyCredentialForRewardView",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "credentialId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "address",
+						"name": "verifier",
+						"type": "address"
+					}
+				],
+				"name": "verifyCredentialView",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"kind": "dev",
+			"methods": {},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"CredentialVerification.sol": "VerificationContract"
+		},
+		"evmVersion": "shanghai",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"CredentialVerification.sol": {
+			"keccak256": "0xc731205a38eef89ed41301e2a61d15993abebaa328ebe44b9651630c78619d41",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://54ceb07698a63a54d12c4b7b1c1c242005b947958931cebc88652580a6fcd746",
+				"dweb:/ipfs/QmUrfqhCNkfpNQuzbE9HRCgn8M1DsugGUcNhLwoFxiAxkv"
+			]
+		}
+	},
+	"version": 1
+}
