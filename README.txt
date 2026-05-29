@@ -392,3 +392,53 @@ Sin Yu Fung – 11828889
 Queensland University of Technology (QUT)
 
 IFB452 Blockchain Technology
+
+
+
+Contribution Statement and Repository Note
+
+During the development of this project, our group did not consistently use GitHub as a version control and contribution-tracking tool throughout the entire development lifecycle. This was an oversight on our part and does not reflect best-practice software development workflows.
+
+Our intention was always to use GitHub for version control; however, due to focusing heavily on the design, implementation, testing, and presentation components of the project, we did not establish the repository workflow early enough to accurately track contributions through commits as the project progressed.
+
+We acknowledge that proper version control is an important aspect of software engineering practice, particularly for collaboration, contribution tracking, and project management. In hindsight, the repository should have been established at the beginning of development with regular commits from both group members.
+
+Despite the lack of historical commit tracking, the project work was completed collaboratively, and the contributions of each team member are outlined below.
+
+Individual Contributions
+
+Hussain Mohammadi (11435925)
+
+Primary responsibilities included:
+- Development of the frontend user interface
+- User experience and visual design improvements
+- Dashboard layout and interaction design
+- BPMN business process modelling
+- Presentation slide preparation and visual refinement
+- Frontend integration and user workflow design
+
+Sin Yu Fung (11828889)
+
+Primary responsibilities included:
+- Development of the Solidity smart contract backend
+- Implementation of the AccessControlContract
+- Implementation of the CredentialRegistryContract
+- Implementation of the VerificationContract
+- Smart contract testing and debugging
+- GitHub repository setup and final repository organisation
+- Deployment preparation and technical documentation support
+
+Collaborative Work
+
+The following project components were developed collaboratively through discussion, review, and refinement by both team members:
+- Project concept selection
+- Blockchain suitability analysis
+- Stakeholder identification
+- System architecture design
+- Smart contract interaction design
+- Design considerations and trade-off analysis
+- Progress presentation preparation
+- Final demonstration planning
+- Video production and presentation delivery
+
+We apologise for not maintaining a complete contribution history through GitHub commits from the beginning of the project. This was an honest oversight rather than an attempt to misrepresent individual contributions. The repository has since been organised and documented to provide a clear representation of the completed system and the work undertaken by both group members.
